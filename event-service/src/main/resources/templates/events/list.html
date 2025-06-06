@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            color: #222;
+        }
+        .glass {
+            background: rgba(255,255,255,0.25);
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+        .header-hero {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .header-hero .mascot {
+            font-size: 3rem;
+            animation: bounce 1.2s infinite alternate;
+            display: inline-block;
+        }
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-18px); }
+        }
+        .search-bar {
+            margin: 0 auto 2rem auto;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.5);
+            border-radius: 9999px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 0.5rem 1.5rem;
+        }
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            font-size: 1.1rem;
+            color: #333;
+            padding: 0.5rem 0.5rem;
+        }
+        .search-bar i {
+            color: #ff8e53;
+            margin-right: 0.7rem;
+        }
+        .fab {
+            position: fixed;
+            bottom: 2.5rem;
+            right: 2.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 24px rgba(255,107,107,0.18);
+            cursor: pointer;
+            transition: transform 0.2s;
+            z-index: 100;
+        }
+        .fab:hover {
+            transform: scale(1.12) rotate(-8deg);
+            background: linear-gradient(135deg, #ff8e53, #ff6b6b);
+        }
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .event-card {
+            position: relative;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 24px rgba(255,107,107,0.10);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .event-card:hover {
+            transform: translateY(-8px) scale(1.03) rotate(-1deg);
+            box-shadow: 0 8px 32px rgba(255,107,107,0.18);
+        }
+        .event-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #ff6b6b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .event-info {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.3em 1em;
+            border-radius: 9999px;
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .status-badge.active {
+            background: rgba(34, 197, 94, 0.18);
+            color: #22c55e;
+        }
+        .status-badge.canceled {
+            background: rgba(239, 68, 68, 0.18);
+            color: #ef4444;
+        }
+        .event-actions {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            display: flex;
+            gap: 0.7rem;
+        }
+        .event-action-btn {
+            background: rgba(255,255,255,0.7);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255,107,107,0.10);
+            cursor: pointer;
+            transition: background 0.18s, color 0.18s, transform 0.18s;
+        }
+        .event-action-btn:hover {
+            background: #ff8e53;
+            color: #fff;
+            transform: scale(1.12) rotate(-8deg);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4em 0 2em 0;
+            color: #ff6b6b;
+            font-size: 2em;
+            opacity: 0.85;
+        }
+        .empty-emoji {
+            font-size: 3em;
+            display: block;
+            margin-bottom: 0.5em;
+            animation: bounce 1.2s infinite alternate;
+        }
+        @media (max-width: 600px) {
+            .header-hero h1 { font-size: 2.2rem; }
+            .event-card { padding: 1.2rem 0.7rem 1rem 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-hero">
+        <span class="mascot">🦄</span>
+        <h1 class="text-5xl font-bold header-title" style="background: linear-gradient(90deg, #ff6b6b, #ff8e53); -webkit-background-clip: text; color: transparent; display:inline-block;">Event Manager</h1>
+        <div style="margin-top:0.5em; color:#ff8e53; font-size:1.2em;">Plan, party, repeat! 🎈</div>
+    </div>
+    <div class="search-bar glass">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search for epic events, e.g. 'karaoke' 🎤 ...">
+    </div>
+    <div id="eventGrid" class="event-grid"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <span class="empty-emoji">🤷‍♂️</span>
+        No events yet!<br>
+        <span style="font-size:0.7em; color:#ff8e53;">Be the first to create an event and get the party started!</span>
+    </div>
+    <button class="fab" id="createEventBtn" title="Create a new event!" style="right:2.5rem; left:auto;">
+        <i class="fas fa-plus"></i>
+    </button>
+    <button class="fab" id="registrationsBtn" title="View Registrations" style="left:2.5rem; right:auto; background: linear-gradient(135deg, #36d1c4, #5b86e5);">
+        <i class="fas fa-users"></i>
+    </button>
+    <script>
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
+            return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
+        }
+        // Render events as cards
+        function renderEvents(events) {
+            const grid = document.getElementById('eventGrid');
+            const empty = document.getElementById('emptyState');
+            grid.innerHTML = '';
+            if (!events.length) {
+                grid.style.display = 'none';
+                empty.style.display = '';
+                return;
+            }
+            grid.style.display = 'grid';
+            empty.style.display = 'none';
+            events.forEach(event => {
+                const card = document.createElement('div');
+                card.className = 'event-card glass';
+                // Status
+                const isCanceled = event.canceled === true;
+                const statusClass = isCanceled ? 'canceled' : 'active';
+                const statusText = isCanceled ? 'Canceled 😢' : 'Active 🎈';
+                // Card content
+                card.innerHTML = `
+                    <div class="event-actions">
+                        <button class="event-action-btn" title="View details" onclick="window.location='/events/events/${event.id}'"><i class="fas fa-eye"></i></button>
+                        <button class="event-action-btn" title="Edit event" onclick="window.location='/events/events/${event.id}/edit'"><i class="fas fa-edit"></i></button>
+                    </div>
+                    <div class="event-title">${event.title || 'Untitled'} ${isCanceled ? '🚫' : '🎉'}</div>
+                    <div class="event-info"><i class="fas fa-calendar-alt"></i> ${formatDate(event.dateTime) || 'N/A'}</div>
+                    <div class="event-info"><i class="fas fa-map-marker-alt"></i> ${event.location || 'N/A'}</div>
+                    <div class="event-info"><i class="fas fa-chair"></i> ${event.availableSeats ?? 'N/A'} seats</div>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        // Fetch and load events
+        async function loadEvents() {
+            try {
+                const response = await fetch('/events/api/events', { headers: { 'Accept': 'application/json' } });
+                if (!response.ok) throw new Error('Failed to fetch events');
+                const events = await response.json();
+                window._allEvents = events;
+                renderEvents(events);
+            } catch (error) {
+                document.getElementById('eventGrid').style.display = 'none';
+                document.getElementById('emptyState').style.display = '';
+            }
+        }
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEvents();
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const events = (window._allEvents || []);
+                const filtered = events.filter(ev =>
+                    (ev.title || '').toLowerCase().includes(searchTerm) ||
+                    (ev.location || '').toLowerCase().includes(searchTerm)
+                );
+                renderEvents(filtered);
+            });
+            document.getElementById('createEventBtn').addEventListener('click', function() {
+                window.location = '/events/events/create';
+            });
+            document.getElementById('registrationsBtn').addEventListener('click', function() {
+                window.location = '/api/registrations/index.html';
+            });
+        });
+    </script>
+</body>
+</html>
